@@ -1,13 +1,22 @@
 class AdminController < ApplicationController
 
   def index
-    exists = Admin.all.count > 0
-    redirect_to root_url unless exists
+    if logged_in then
+      @runners = all_runners
+
+      respond_to do |format|
+        format.html
+      end
+    else
+      redirect_to root_url
+    end
   end
 
   def login
-    exists = Admin.where(:username => params[:username], :password => params[:password]).count > 0
-    if exists then
+    session[:username] = params[:username]
+    session[:password] = Digest::SHA1.hexdigest(params[:password])
+
+    if logged_in then
       redirect_to admin_index_url
     else
       redirect_to root_url, :notice => 'Login failed'
